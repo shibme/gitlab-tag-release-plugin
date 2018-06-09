@@ -1,0 +1,163 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>me.shib.lib</groupId>
+    <artifactId>gitlab-tag-release-plugin</artifactId>
+    <packaging>maven-plugin</packaging>
+    <version>0.1.0</version>
+    <name>GitLab Tag-Release Plugin</name>
+    <description>Maven plugin to create GitLab tag-releases and upload assets to the tag-release</description>
+    <url>https://gitlab.com/shibme/gitlab-tag-release-plugin</url>
+
+    <developers>
+        <developer>
+            <name>Shibly Meeran</name>
+            <url>https://shib.me</url>
+            <id>shibme</id>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://gitlab.com/shibme/gitlab-tag-release-plugin</url>
+        <connection>scm:git:https://gitlab.com/shibme/gitlab-tag-release-plugin.git</connection>
+        <developerConnection>scm:git:https://gitlab.com/shibme/gitlab-tag-release-plugin.git</developerConnection>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License</name>
+            <url>http://www.gnu.org/licenses/gpl.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <repository>
+            <id>bintray-shibme-maven</id>
+            <name>shibme-maven</name>
+            <url>https://api.bintray.com/maven/shibme/maven/${project.artifactId}/;publish=1;override=1</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.scm</groupId>
+                        <artifactId>maven-scm-provider-gitexe</artifactId>
+                        <version>1.10.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>me.shib.lib</groupId>
+                        <artifactId>gitlab-tag-release-plugin</artifactId>
+                        <version>0.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>gitlab-upload</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>release</goal>
+                                </goals>
+                                <inherited>false</inherited>
+                                <configuration>
+                                    <tag>v${project.version}</tag>
+                                    <failOnExistingTagRelease>false</failOnExistingTagRelease>
+                                    <overwriteTag>true</overwriteTag>
+                                    <message>Release information for v${project.version}</message>
+                                    <description>Might require transitive dependencies.
+                                        Please take a look into pom.xml if you plan to use it manually.
+                                        It is recommended to use as maven dependency.
+                                    </description>
+                                    <artifact>${project.build.directory}${file.separator}${project.artifactId}-${project.version}.jar
+                                    </artifact>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.gitlab</groupId>
+            <artifactId>java-gitlab-api</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>3.5.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>3.5.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
