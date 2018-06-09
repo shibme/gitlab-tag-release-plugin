@@ -111,6 +111,7 @@
                                 </goals>
                                 <inherited>false</inherited>
                                 <configuration>
+                                    <serverUrl>https://gitlab.com</serverUrl>
                                     <tag>v${project.version}</tag>
                                     <failOnExistingTagRelease>false</failOnExistingTagRelease>
                                     <overwriteTag>true</overwriteTag>
@@ -119,7 +120,8 @@
                                         Please take a look into pom.xml if you plan to use it manually.
                                         It is recommended to use as maven dependency.
                                     </description>
-                                    <artifact>${project.build.directory}${file.separator}${project.artifactId}-${project.version}.jar
+                                    <artifact>
+                                        ${project.build.directory}${file.separator}${project.artifactId}-${project.version}.jar
                                     </artifact>
                                 </configuration>
                             </execution>

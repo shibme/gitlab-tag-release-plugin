@@ -12,6 +12,7 @@ Sample configuration for `pom.xml`
     <artifactId>gitlab-tag-release-plugin</artifactId>
     <version>0.1.0</version>
     <configuration>
+        <serverUrl>https://gitlab.com</serverUrl>
         <tag>v${project.version}</tag>
         <failOnExistingTagRelease>false</failOnExistingTagRelease>
         <overwriteTag>true</overwriteTag>
@@ -35,13 +36,14 @@ Sample configuration for `pom.xml`
 
 If unspecified explicitly, the plugin will upload the main artifact of your project and take the GitLab repo url from the `<scm>` section.
 
-By default, the plugin will look for GitLab credentials in your maven `settings.xml`. Example
+By default, the plugin will look for GitLab credentials in your maven `settings.xml`.
+You can also inject through environmental variables as shown below.
 ```
 <servers>
     <server>
         <id>gitlab</id>
-        <username>GITLAB_USERNAME</username>
-        <password>GITLAB_PASSWORD</password>
+        <username>${env.GITLAB_USERNAME}</username>
+        <password>${env.GITLAB_PASSWORD}</password>
     </server>
 </servers>
 ```
@@ -50,7 +52,7 @@ or can be
 <servers>
     <server>
         <id>gitlab</id>
-        <privateKey>GITLAB_API_TOKEN</privateKey>
+        <privateKey>${env.GITLAB_API_TOKEN}</privateKey>
     </server>
 </servers>
 ```

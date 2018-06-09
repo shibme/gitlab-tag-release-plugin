@@ -26,6 +26,7 @@ import org.gitlab.api.models.GitlabUpload;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +53,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
     /**
      * Server id for GitLab access.
      *
-     * @parameter default-value="gitlab" expression="gitlab"
+     * @parameter default-value="gitlab" property="gitlab"
      */
     private String serverId;
     /**
@@ -64,7 +65,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
     /**
      * The tag name this release is based on.
      *
-     * @parameter expression="${project.version}"
+     * @parameter property="project.version"
      */
     private String tag;
     /**
@@ -76,38 +77,38 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
     /**
      * The tag release message
      *
-     * @parameter expression="${project.name}"
+     * @parameter property="project.name"
      */
     private String message;
     /**
      * The tag release description
      *
-     * @parameter expression="${project.description}"
+     * @parameter property="project.description"
      */
     private String description;
     /**
      * The GitLab id of the project. By default initialized from the project scm connection
      *
-     * @parameter default-value="${project.scm.connection}" expression="${release.repositoryId}"
+     * @parameter default-value="${project.scm.connection}" property="release.repositoryId"
      * @required
      */
     private String repositoryId;
     /**
      * The Maven settings
      *
-     * @parameter expression="${settings}
+     * @parameter property="settings"
      */
     private Settings settings;
     /**
      * The Maven session
      *
-     * @parameter expression="${session}"
+     * @parameter property="session"
      */
     private MavenSession session;
     /**
      * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
      *
-     * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" expression="${release.artifact}"
+     * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" property="release.artifact"
      */
     private String artifact;
     /**
@@ -187,45 +188,60 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
             getLog().error(e);
             throw new MojoExecutionException("Failed to find project: " + repositoryId, e);
         }
-        GitlabTag gitlabTag = null;
+
+        StringBuilder fileListBuilder = new StringBuilder();
+        try {
+            List<GitlabUpload> uploads = new ArrayList<GitlabUpload>();
+            if (artifact != null && !artifact.trim().isEmpty()) {
+                File asset = new File(artifact);
+                if (asset.exists()) {
+                    uploads.add(uploadAsset(gitlabAPI, project, asset));
+                }
+            }
+            if (fileSet != null) {
+                uploads.addAll(uploadAssets(gitlabAPI, project, fileSet));
+            }
+            if (fileSets != null) {
+                for (FileSet set : fileSets) {
+                    uploads.addAll(uploadAssets(gitlabAPI, project, set));
+                }
+            }
+            if (uploads.size() > 0) {
+                fileListBuilder.append("### Artifacts");
+                for (GitlabUpload upload : uploads) {
+                    fileListBuilder.append("\n").append(upload.getMarkdown());
+                }
+            }
+        } catch (IOException e) {
+            getLog().error(e);
+            throw new MojoExecutionException("Failed to upload assets", e);
+        }
+        if (description == null) {
+            description = fileListBuilder.toString();
+        } else {
+            description = description + "\n" + fileListBuilder.toString();
+        }
+        GitlabTag gitlabTag;
         try {
             gitlabTag = findTag(gitlabAPI, project, tag);
-            if (gitlabTag != null && overwriteTag) {
-                getLog().warn("Tag release already exists. Deleting tag: " + tag);
-                gitlabAPI.deleteTag(project, tag);
-            } else {
-                String message = "Tag release" + tag + " already exists. Not creating";
-                if (failOnExistingTagRelease) {
-                    throw new MojoExecutionException(message);
+            if (gitlabTag != null) {
+                if (overwriteTag) {
+                    getLog().warn("Deleting existing tag: " + tag);
+                    gitlabAPI.deleteTag(project, tag);
+                } else {
+                    String message = "Tag release" + tag + " already exists. Not creating";
+                    if (failOnExistingTagRelease) {
+                        throw new MojoExecutionException(message);
+                    }
+                    getLog().info(message);
+                    return;
                 }
-                getLog().info(message);
-                return;
             }
             getLog().info("Creating tag: " + tag);
-            gitlabTag = gitlabAPI.addTag(project, tag, gitBranch, message, description);
+            gitlabAPI.addTag(project, tag, gitBranch, message, description);
         } catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException("Failed to create release", e);
-        }
-
-        try {
-            if (artifact != null && !artifact.trim().isEmpty()) {
-                File asset = new File(artifact);
-                if (asset.exists())
-                    uploadAsset(gitlabAPI, project, asset);
-            }
-
-            if (fileSet != null)
-                uploadAssets(gitlabAPI, project, fileSet);
-
-            if (fileSets != null)
-                for (FileSet set : fileSets)
-                    uploadAssets(gitlabAPI, project, set);
-
-        } catch (IOException e) {
-
-            getLog().error(e);
-            throw new MojoExecutionException("Failed to upload assets", e);
         }
     }
 
@@ -236,14 +252,17 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
         return upload;
     }
 
-    private void uploadAssets(GitlabAPI gitlabAPI, GitlabProject project, FileSet fileset) throws IOException {
+    private List<GitlabUpload> uploadAssets(GitlabAPI gitlabAPI, GitlabProject project, FileSet fileset) throws IOException {
         List<File> assets = FileUtils.getFiles(
                 new File(fileset.getDirectory()),
                 StringUtils.join(fileset.getIncludes(), ','),
                 StringUtils.join(fileset.getExcludes(), ',')
         );
-        for (File asset : assets)
-            uploadAsset(gitlabAPI, project, asset);
+        List<GitlabUpload> uploads = new ArrayList<GitlabUpload>();
+        for (File asset : assets) {
+            uploads.add(uploadAsset(gitlabAPI, project, asset));
+        }
+        return uploads;
     }
 
     private GitlabTag findTag(GitlabAPI gitlabAPI, GitlabProject project, String releaseNameToFind) throws IOException {
