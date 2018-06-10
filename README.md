@@ -52,7 +52,7 @@ or can be
 <servers>
     <server>
         <id>gitlab</id>
-        <privateKey>${env.GITLAB_API_TOKEN}</privateKey>
+        <privateKey>${env.GITLAB_ACCESS_TOKEN}</privateKey>
     </server>
 </servers>
 ```

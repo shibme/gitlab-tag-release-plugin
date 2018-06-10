@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * @goal release
  * @phase deploy
  */
-public class UploadMojo extends AbstractMojo implements Contextualizable {
+public class GitLabTagReleaseMojo extends AbstractMojo implements Contextualizable {
 
     private static final String defaultServerUrl = "https://gitlab.com";
     private static final String defaultBranch = "master";
@@ -133,8 +133,6 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
     private PlexusContainer container;
     /**
      * If this is a prerelease. Will be set by default according to ${project.version} (see {@link #guessPreRelease(String)}.
-     *
-     * @parameter
      */
     private Boolean prerelease;
     /**
@@ -174,60 +172,26 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
         if (prerelease == null)
             prerelease = guessPreRelease(tag);
         repositoryId = computeRepositoryId(repositoryId);
-        GitlabAPI gitlabAPI = null;
+        GitlabAPI gitlabAPI;
         try {
             gitlabAPI = createGitlabAPI(serverId, serverUrl);
         } catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException("Failed to connect with GitLab", e);
         }
-        GitlabProject project = null;
+        GitlabProject project;
         try {
             project = gitlabAPI.getProject(repositoryId);
         } catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException("Failed to find project: " + repositoryId, e);
         }
-
-        StringBuilder fileListBuilder = new StringBuilder();
         try {
-            List<GitlabUpload> uploads = new ArrayList<GitlabUpload>();
-            if (artifact != null && !artifact.trim().isEmpty()) {
-                File asset = new File(artifact);
-                if (asset.exists()) {
-                    uploads.add(uploadAsset(gitlabAPI, project, asset));
-                }
-            }
-            if (fileSet != null) {
-                uploads.addAll(uploadAssets(gitlabAPI, project, fileSet));
-            }
-            if (fileSets != null) {
-                for (FileSet set : fileSets) {
-                    uploads.addAll(uploadAssets(gitlabAPI, project, set));
-                }
-            }
-            if (uploads.size() > 0) {
-                fileListBuilder.append("### Artifacts");
-                for (GitlabUpload upload : uploads) {
-                    fileListBuilder.append("\n").append(upload.getMarkdown());
-                }
-            }
-        } catch (IOException e) {
-            getLog().error(e);
-            throw new MojoExecutionException("Failed to upload assets", e);
-        }
-        if (description == null) {
-            description = fileListBuilder.toString();
-        } else {
-            description = description + "\n" + fileListBuilder.toString();
-        }
-        GitlabTag gitlabTag;
-        try {
-            gitlabTag = findTag(gitlabAPI, project, tag);
+            GitlabTag gitlabTag = findTag(gitlabAPI, project, tag);
             if (gitlabTag != null) {
                 if (overwriteTag) {
                     getLog().warn("Deleting existing tag: " + tag);
-                    gitlabAPI.deleteTag(project, tag);
+                    gitlabAPI.deleteTag(project.getId(), tag);
                 } else {
                     String message = "Tag release" + tag + " already exists. Not creating";
                     if (failOnExistingTagRelease) {
@@ -237,11 +201,43 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
                     return;
                 }
             }
+            StringBuilder fileListBuilder = new StringBuilder();
+            try {
+                List<GitlabUpload> uploads = new ArrayList<GitlabUpload>();
+                if (artifact != null && !artifact.trim().isEmpty()) {
+                    File asset = new File(artifact);
+                    if (asset.exists()) {
+                        uploads.add(uploadAsset(gitlabAPI, project, asset));
+                    }
+                }
+                if (fileSet != null) {
+                    uploads.addAll(uploadAssets(gitlabAPI, project, fileSet));
+                }
+                if (fileSets != null) {
+                    for (FileSet set : fileSets) {
+                        uploads.addAll(uploadAssets(gitlabAPI, project, set));
+                    }
+                }
+                if (uploads.size() > 0) {
+                    fileListBuilder.append("### Artifacts");
+                    for (GitlabUpload upload : uploads) {
+                        fileListBuilder.append("\n").append(upload.getMarkdown());
+                    }
+                }
+            } catch (IOException e) {
+                getLog().error(e);
+                throw new MojoExecutionException("Failed to upload assets", e);
+            }
+            if (description == null) {
+                description = fileListBuilder.toString();
+            } else {
+                description = description + "\n" + fileListBuilder.toString();
+            }
             getLog().info("Creating tag: " + tag);
             gitlabAPI.addTag(project, tag, gitBranch, message, description);
         } catch (IOException e) {
             getLog().error(e);
-            throw new MojoExecutionException("Failed to create release", e);
+            throw new MojoExecutionException("Failed to create tag-release", e);
         }
     }
 
@@ -280,7 +276,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
         return GitlabAPI.connect(serverUrl, privateToken);
     }
 
-    public GitlabAPI createGitlabAPI(String serverId, String serverUrl) throws MojoExecutionException, IOException {
+    private GitlabAPI createGitlabAPI(String serverId, String serverUrl) throws MojoExecutionException, IOException {
         String usernameProperty = System.getProperty("username");
         String passwordProperty = System.getProperty("password");
         if (usernameProperty != null && passwordProperty != null) {
@@ -320,7 +316,7 @@ public class UploadMojo extends AbstractMojo implements Contextualizable {
      * @param serverId must be non-null and non-empty
      * @return server or null if none matching
      */
-    protected Server getServer(final Settings settings, final String serverId) {
+    private Server getServer(final Settings settings, final String serverId) {
         if (settings == null)
             return null;
         List<Server> servers = settings.getServers();

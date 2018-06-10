@@ -8,7 +8,7 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 
-public class UploadMojoTest {
+public class GitLabTagReleaseMojoTest {
 
     private Map<String, String> computeRepositoryIdData;
 
@@ -37,23 +37,23 @@ public class UploadMojoTest {
     public void testComputeRepositoryId() throws Exception {
         for (String source : computeRepositoryIdData.keySet()) {
             String expected = computeRepositoryIdData.get(source);
-            assertEquals(source, expected, UploadMojo.computeRepositoryId(source));
+            assertEquals(source, expected, GitLabTagReleaseMojo.computeRepositoryId(source));
         }
     }
 
     @Test
     public void testGuessPreRelease() {
-        assertTrue(UploadMojo.guessPreRelease("1.0-SNAPSHOT"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-alpha"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-alpha-1"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-beta"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-beta-1"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-RC"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-RC1"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-rc1"));
-        assertTrue(UploadMojo.guessPreRelease("1.0-rc-1"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-SNAPSHOT"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-alpha"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-alpha-1"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-beta"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-beta-1"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-RC"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-RC1"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-rc1"));
+        assertTrue(GitLabTagReleaseMojo.guessPreRelease("1.0-rc-1"));
 
-        assertFalse(UploadMojo.guessPreRelease("1"));
-        assertFalse(UploadMojo.guessPreRelease("1.0"));
+        assertFalse(GitLabTagReleaseMojo.guessPreRelease("1"));
+        assertFalse(GitLabTagReleaseMojo.guessPreRelease("1.0"));
     }
 }
