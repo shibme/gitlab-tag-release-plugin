@@ -110,11 +110,9 @@
                                 It is recommended to use as maven dependency to avoid issues.
                             </description>
                             <tag>${project.artifactId}-${project.version}</tag>
-                            <fileSets>
-                                <fileSet>
-                                    <directory>${project.build.directory}</directory>
-                                </fileSet>
-                            </fileSets>
+                            <artifact>
+                                ${project.build.directory}${file.separator}${project.artifactId}-${project.version}.jar
+                            </artifact>
                         </configuration>
                     </execution>
                 </executions>
