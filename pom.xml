@@ -63,7 +63,7 @@
             <plugin>
                 <groupId>me.shib.lib</groupId>
                 <artifactId>gitlab-tag-release-plugin</artifactId>
-                <version>0.1.0</version>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <id>gitlab-upload</id>
@@ -85,36 +85,6 @@
                             <artifact>
                                 ${project.build.directory}${file.separator}${project.artifactId}-${project.version}.jar
                             </artifact>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>de.jutzig</groupId>
-                <artifactId>github-release-plugin</artifactId>
-                <version>1.2.0</version>
-                <executions>
-                    <execution>
-                        <id>github-upload</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>release</goal>
-                        </goals>
-                        <inherited>false</inherited>
-                        <configuration>
-                            <repositoryId>scm:git:https://github.com/shibme/gitlab-tag-release-plugin.git</repositoryId>
-                            <overwriteArtifact>true</overwriteArtifact>
-                            <releaseName>${project.artifactId}-${project.version}</releaseName>
-                            <description>Might require transitive dependencies.
-                                Please take a look into pom.xml if you plan to use it manually.
-                                It is recommended to use as maven dependency to avoid issues.
-                            </description>
-                            <tag>${project.version}</tag>
-                            <fileSets>
-                                <fileSet>
-                                    <directory>${project.build.directory}</directory>
-                                </fileSet>
-                            </fileSets>
                         </configuration>
                     </execution>
                 </executions>
