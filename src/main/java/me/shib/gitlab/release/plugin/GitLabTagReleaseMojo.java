@@ -221,7 +221,7 @@ public class GitLabTagReleaseMojo extends AbstractMojo implements Contextualizab
                 if (uploads.size() > 0) {
                     fileListBuilder.append("### Artifacts");
                     for (GitlabUpload upload : uploads) {
-                        fileListBuilder.append("\n").append(upload.getMarkdown());
+                        fileListBuilder.append("\n* ").append(upload.getMarkdown());
                     }
                 }
             } catch (IOException e) {
