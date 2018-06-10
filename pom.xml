@@ -74,7 +74,7 @@
                         <inherited>false</inherited>
                         <configuration>
                             <serverUrl>https://gitlab.com</serverUrl>
-                            <tag>v${project.version}</tag>
+                            <tag>${project.artifactId}-${project.version}</tag>
                             <failOnExistingTagRelease>false</failOnExistingTagRelease>
                             <overwriteTag>true</overwriteTag>
                             <message>${project.artifactId}-${project.version}</message>
@@ -109,7 +109,7 @@
                                 Please take a look into pom.xml if you plan to use it manually.
                                 It is recommended to use as maven dependency to avoid issues.
                             </description>
-                            <tag>${project.version}</tag>
+                            <tag>${project.artifactId}-${project.version}</tag>
                             <fileSets>
                                 <fileSet>
                                     <directory>${project.build.directory}</directory>
