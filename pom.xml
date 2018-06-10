@@ -77,7 +77,7 @@
                             <tag>v${project.version}</tag>
                             <failOnExistingTagRelease>false</failOnExistingTagRelease>
                             <overwriteTag>true</overwriteTag>
-                            <message>Release information for v${project.version}</message>
+                            <message>${project.artifactId}-${project.version}</message>
                             <description>Might require transitive dependencies.
                                 Please take a look into pom.xml if you plan to use it manually.
                                 It is recommended to use as maven dependency.
