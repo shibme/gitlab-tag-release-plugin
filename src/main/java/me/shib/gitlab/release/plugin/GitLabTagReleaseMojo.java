@@ -108,7 +108,7 @@ public class GitLabTagReleaseMojo extends AbstractMojo implements Contextualizab
     /**
      * The file to upload to the release. Default is ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging} (the main artifact)
      *
-     * @parameter default-value="${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}" property="release.artifact"
+     * @parameter
      */
     private String artifact;
     /**
