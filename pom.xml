@@ -117,17 +117,6 @@
         </plugins>
     </build>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>${project.distributionManagement.repository.id}</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/${project.owner.id}/maven</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>

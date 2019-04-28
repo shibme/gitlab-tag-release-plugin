@@ -1,4 +1,4 @@
-image: maven:latest
+image: maven:3-jdk-8
 
 variables:
   MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
@@ -9,7 +9,7 @@ cache:
     - .m2/repository/
     - target/
 
-deploy:
+Deploying to Bintray:
   stage: deploy
   script:
     - mvn $MAVEN_CLI_OPTS clean install
