@@ -4,24 +4,40 @@
     <groupId>me.shib.lib</groupId>
     <artifactId>gitlab-tag-release-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
     <name>GitLab Tag-Release Plugin</name>
-    <description>Maven plugin to create GitLab tag-releases and upload assets to the tag-release</description>
-    <url>https://gitlab.com/shibme/gitlab-tag-release-plugin</url>
+    <description>Maven plugin to create GitLab tag based releases and upload assets to the tag created for the specific
+        version
+    </description>
+    <url>https://github.com/${project.owner.id}/${project.artifactId}</url>
+
+    <issueManagement>
+        <url>https://github.com/${project.owner.id}/${project.artifactId}/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <scm>
+        <url>https://github.com/${project.owner.id}/${project.artifactId}</url>
+        <connection>scm:git:https://github.com/${project.owner.id}/${project.artifactId}.git</connection>
+        <developerConnection>scm:git:git@github.com:${project.owner.id}/${project.artifactId}.git</developerConnection>
+    </scm>
 
     <developers>
         <developer>
             <name>Shibly Meeran</name>
-            <url>https://shib.me</url>
+            <url>https://github.com/shibme</url>
             <id>shibme</id>
         </developer>
     </developers>
 
-    <scm>
-        <url>https://gitlab.com/shibme/gitlab-tag-release-plugin</url>
-        <connection>scm:git:https://gitlab.com/shibme/gitlab-tag-release-plugin.git</connection>
-        <developerConnection>scm:git:https://gitlab.com/shibme/gitlab-tag-release-plugin.git</developerConnection>
-    </scm>
+    <distributionManagement>
+        <repository>
+            <id>bintray-${project.owner.id}-maven</id>
+            <name>${project.owner.id}-maven</name>
+            <url>https://api.bintray.com/maven/${project.owner.id}/maven/${project.artifactId}/;publish=1;override=1
+            </url>
+        </repository>
+    </distributionManagement>
 
     <licenses>
         <license>
@@ -31,18 +47,11 @@
         </license>
     </licenses>
 
-    <distributionManagement>
-        <repository>
-            <id>bintray-shibme-maven</id>
-            <name>shibme-maven</name>
-            <url>https://api.bintray.com/maven/shibme/maven/${project.artifactId}/;publish=1;override=1</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+        <project.owner.id>shibme</project.owner.id>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
     <build>
@@ -56,6 +65,22 @@
                         <id>attach-sources</id>
                         <goals>
                             <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>mojo-descriptor</id>
+                        <goals>
+                            <goal>descriptor</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -92,6 +117,17 @@
         </plugins>
     </build>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>${project.distributionManagement.repository.id}</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/${project.owner.id}/maven</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -101,7 +137,7 @@
         <dependency>
             <groupId>org.gitlab</groupId>
             <artifactId>java-gitlab-api</artifactId>
-            <version>4.0.0</version>
+            <version>4.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>

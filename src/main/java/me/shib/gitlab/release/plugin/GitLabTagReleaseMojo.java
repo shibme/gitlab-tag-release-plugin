@@ -16,7 +16,6 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.codehaus.plexus.util.FileUtils;
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.models.GitlabProject;
@@ -37,7 +36,7 @@ import java.util.regex.Pattern;
  * @goal release
  * @phase deploy
  */
-public class GitLabTagReleaseMojo extends AbstractMojo implements Contextualizable {
+public class GitLabTagReleaseMojo extends AbstractMojo {
 
     private static final String defaultServerUrl = "https://gitlab.com";
     private static final String defaultBranch = "master";

@@ -1,8 +1,9 @@
 # GitLab Tag-Release Plugin
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.shib.lib/gitlab-tag-release-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/me.shib.lib/gitlab-tag-release-plugin)
+[![Build Status](https://gitlab.com/shibme/gitlab-tag-release-plugin/badges/master/pipeline.svg)](https://gitlab.com/shibme/gitlab-tag-release-plugin/pipelines)
 
-Maven plugin to create GitLab tag-releases and upload assets to the tag-release
+Maven plugin to create GitLab tag based releases and upload assets to the tag created for the specific version
 
 Sample configuration for `pom.xml`
 
@@ -10,7 +11,7 @@ Sample configuration for `pom.xml`
 <plugin>
     <groupId>me.shib.lib</groupId>
     <artifactId>gitlab-tag-release-plugin</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.2</version>
     <configuration>
         <serverUrl>https://gitlab.com</serverUrl>
         <tag>v${project.version}</tag>
@@ -58,5 +59,3 @@ or can be
 ```
 
 These credentials can be overridden by setting `username` and `password` as system properties.
-
-This work has been inspired from [jutzig/github-release-plugin](https://github.com/jutzig/github-release-plugin).
